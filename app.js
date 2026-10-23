@@ -8,7 +8,7 @@ const STATE = {
   activeView: 'landing', // 'landing' | 'app'
   activeAppScreen: 'map', // 'map' | 'activities' | 'leaderboard' | 'account'
   activeCategoryFilter: 'all',
-  
+
   // Supabase Configuration
   supabase: null,
   isSupabaseConnected: false,
@@ -324,7 +324,7 @@ function switchMainView(viewName) {
     appSection.classList.add('active');
     toggleBtn.classList.add('active');
     toggleText.innerText = 'กลับหน้าแรก (Landing)';
-    
+
     // Invalidate map size so Leaflet renders properly inside container
     setTimeout(() => {
       if (leafletMap) leafletMap.invalidateSize();
@@ -395,10 +395,12 @@ function initLeafletMap() {
   }).setView([13.7563, 100.5018], 10);
 
   // Modern Dark/Navy Map Tiles
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+  // ตัวอย่าง: ถ้าต้องการเปลี่ยนเป็นภาพถ่ายดาวเทียม (Satellite)
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
     maxZoom: 19
   }).addTo(leafletMap);
+
+
 
   // Add zoom control at bottom right
   L.control.zoom({ position: 'topright' }).addTo(leafletMap);
@@ -441,7 +443,7 @@ function renderMapMarkers() {
 
   filtered.forEach(dest => {
     const isVipLocked = dest.isVipOnly && STATE.user.tier === 'free';
-    
+
     // Choose pin styling
     let pinColor = '#10b981';
     let pinIcon = 'fa-mountain';
@@ -526,7 +528,7 @@ function filterMapCategory(cat, btn) {
 function handleSearchMap(query) {
   if (!query || !leafletMap) return;
   const q = query.toLowerCase().trim();
-  const matched = STATE.destinations.find(d => 
+  const matched = STATE.destinations.find(d =>
     d.nameTh.toLowerCase().includes(q) || d.province.toLowerCase().includes(q)
   );
 
@@ -618,13 +620,12 @@ function renderActivities() {
             <span class="quest-reward-pill">
               <i class="fa-solid fa-gift"></i> ${act.rewardVoucher}
             </span>
-            ${
-              act.isClaimed
-                ? `<span style="color: var(--primary-light); font-weight: 700;"><i class="fa-solid fa-check"></i> รับแล้ว</span>`
-                : isCompleted
-                  ? `<button class="btn-claim-reward" onclick="claimQuestReward('${act.id}')">🎉 แลกรับ ฿</button>`
-                  : `<span style="color: var(--text-dim); font-size: 11px;">อีก ${(act.targetKm - act.currentKm).toFixed(1)} km</span>`
-            }
+            ${act.isClaimed
+        ? `<span style="color: var(--primary-light); font-weight: 700;"><i class="fa-solid fa-check"></i> รับแล้ว</span>`
+        : isCompleted
+          ? `<button class="btn-claim-reward" onclick="claimQuestReward('${act.id}')">🎉 แลกรับ ฿</button>`
+          : `<span style="color: var(--text-dim); font-size: 11px;">อีก ${(act.targetKm - act.currentKm).toFixed(1)} km</span>`
+      }
           </div>
         </div>
       </div>
@@ -686,20 +687,16 @@ function renderLeaderboard() {
 // SCREEN 4: บัญชี (ACCOUNT & PROFILE MANAGEMENT)
 // ==============================================================================
 function updateUserUI() {
-  // Update Navbar badges
-  const navTier = document.getElementById('navTierBadge');
   const accountPill = document.getElementById('accountStatusPill');
   const accountStatusText = document.getElementById('accountStatusText');
   const accountBadgeIcon = document.getElementById('accountBadgeIcon');
+  const headerUpgradeBtn = document.getElementById('headerUpgradeBtn');
+  const mapVipBanner = document.getElementById('mapVipBanner');
+  const islandText = document.getElementById('islandText');
 
   const tier = STATE.user.tier;
   const isVip = tier === 'vip';
   const isPro = tier === 'pro';
-
-  if (navTier) {
-    navTier.innerText = tier.toUpperCase();
-    navTier.className = `user-tier-pill tier-${tier}`;
-  }
 
   if (accountPill) {
     accountPill.className = `account-status-pill tier-${tier}`;
@@ -724,33 +721,69 @@ function updateUserUI() {
     }
   }
 
-  document.getElementById('mySavingsVal').innerText = `฿${STATE.user.savingsThb.toLocaleString()}`;
-  document.getElementById('myCoinsVal').innerText = STATE.user.coins.toLocaleString();
-
-  // Highlight selected pricing card on landing page
-  document.querySelectorAll('.pricing-card').forEach(c => c.style.outline = 'none');
-  if (tier === 'vip') {
-    const vipCard = document.getElementById('planCardVip');
-    if (vipCard) vipCard.style.outline = '2px solid var(--accent-gold)';
-  } else if (tier === 'pro') {
-    const proCard = document.getElementById('planCardPro');
-    if (proCard) proCard.style.outline = '2px solid var(--secondary)';
+  // Mobile Top Header Upgrade Button status
+  if (headerUpgradeBtn) {
+    if (isVip) {
+      headerUpgradeBtn.innerHTML = '<i class="fa-solid fa-crown"></i> <span>VIP Member</span>';
+      headerUpgradeBtn.classList.remove('pulse-badge');
+      headerUpgradeBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+      headerUpgradeBtn.style.color = '#ffffff';
+    } else if (isPro) {
+      headerUpgradeBtn.innerHTML = '<i class="fa-solid fa-bolt"></i> <span>Pro Member</span>';
+      headerUpgradeBtn.classList.remove('pulse-badge');
+      headerUpgradeBtn.style.background = 'linear-gradient(135deg, #0ea5e9, #0284c7)';
+      headerUpgradeBtn.style.color = '#ffffff';
+    } else {
+      headerUpgradeBtn.innerHTML = '<i class="fa-solid fa-crown"></i> <span>อัปเกรด VIP</span>';
+      headerUpgradeBtn.classList.add('pulse-badge');
+      headerUpgradeBtn.style.background = 'linear-gradient(135deg, #fbbf24, #d97706)';
+      headerUpgradeBtn.style.color = '#1e1b4b';
+    }
   }
+
+  // Floating banner on map
+  if (mapVipBanner) {
+    if (isVip) {
+      mapVipBanner.style.display = 'none';
+    } else {
+      mapVipBanner.style.display = 'flex';
+    }
+  }
+
+  // Dynamic Island status
+  if (islandText) {
+    islandText.innerText = isVip ? 'GoThai • VIP Explorer' : 'GoThai GPS Active';
+  }
+
+  const savingsEl = document.getElementById('mySavingsVal');
+  const coinsEl = document.getElementById('myCoinsVal');
+  if (savingsEl) savingsEl.innerText = `฿${STATE.user.savingsThb.toLocaleString()}`;
+  if (coinsEl) coinsEl.innerText = STATE.user.coins.toLocaleString();
 
   // Refresh map pins in case VIP secrets need unlocking
   renderMapMarkers();
 }
 
+function openSubscriptionPaywall() {
+  const modal = document.getElementById('paywallModal');
+  if (modal) modal.classList.add('active');
+}
+
+function closeSubscriptionPaywall() {
+  const modal = document.getElementById('paywallModal');
+  if (modal) modal.classList.remove('active');
+}
+
 function openUpgradePrompt() {
-  switchMainView('landing');
-  const pricingSection = document.getElementById('pricing');
-  if (pricingSection) pricingSection.scrollIntoView({ behavior: 'smooth' });
+  openSubscriptionPaywall();
 }
 
 // ==============================================================================
 // PAYMENT GATEWAY & "MAKE ME MONEY" ENGINE
 // ==============================================================================
 function openPaymentGateway(planId, planName, priceThb) {
+  closeSubscriptionPaywall();
+
   STATE.pendingOrder = {
     planId,
     planName,
@@ -840,7 +873,7 @@ function processPaymentSimulation() {
 
 function dismissSuccessAndOpenApp() {
   document.getElementById('successModal').classList.remove('active');
-  switchMainView('app');
+  closeSubscriptionPaywall();
   switchAppScreen('map');
   showToast('สิทธิประโยชน์สมาชิกเปิดใช้งานแล้ว ยินดีต้อนรับ!', 'success');
 }
