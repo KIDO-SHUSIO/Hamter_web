@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GoThai Explorer | แอปท่องเที่ยวไทย โมเดลสร้างรายได้ Make Me Money</title>
+  <meta name="description" content="แอปพลิเคชันท่องเที่ยวไทยแนวใหม่ที่เชื่อมโยงระบบ Subscription สร้างรายได้ เที่ยว ปั่น ขับรถ สะสมระยะทาง แลกรับเงินคืนและส่วนลดกว่า 50%">
+  
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- FontAwesome 6 for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Leaflet CSS for Interactive GPS Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+  <!-- Canvas Confetti CDN for Payment Celebration -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
+  <!-- Supabase JS Client CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+  <!-- ==============================================================================
+       TOP GLOBAL NAVIGATION
+       ============================================================================== -->
+  <header class="navbar">
+    <div class="nav-brand" onclick="switchMainView('landing')">
+      <div class="brand-icon">
+        <i class="fa-solid fa-compass"></i>
+      </div>
+      <div class="brand-text">
+        <h1>GoThai Explorer</h1>
+        <p><i class="fa-solid fa-coins"></i> เที่ยวไทย ได้เงินคืน & สิทธิพิเศษ</p>
+      </div>
+    </div>
+
+    <ul class="nav-links">
+      <li><a class="nav-link active" onclick="switchMainView('landing')">หน้าแรก</a></li>
+      <li><a class="nav-link" href="#features" onclick="switchMainView('landing')">จุดเด่น & ฟีเจอร์</a></li>
+      <li><a class="nav-link" href="#pricing" onclick="switchMainView('landing')">แพ็กเกจสมาชิก</a></li>
+      <li><a class="nav-link" onclick="switchMainView('app')">ทดลองใช้แอป (Demo)</a></li>
+    </ul>
+
+    <div class="nav-actions">
+      <!-- Button to toggle between Landing Page & Mobile App Dashboard -->
+      <button class="btn-view-toggle" id="viewToggleBtn" onclick="toggleMainView()">
+        <i class="fa-solid fa-mobile-screen"></i>
+        <span id="viewToggleText">เปิดหน้าแอป (App View)</span>
+      </button>
+
+      <!-- Supabase Connection Config Trigger -->
+      <button class="btn btn-secondary btn-sm" onclick="openSupabaseModal()" title="ตั้งค่าการเชื่อมต่อ Supabase Database">
+        <i class="fa-solid fa-database"></i>
+        <span>Supabase</span>
+      </button>
+
+      <!-- User Tier Status Pill -->
+      <div class="user-badge" onclick="switchMainView('app'); switchAppScreen('account');">
+        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100" alt="Avatar" class="user-badge-img" id="navAvatar">
+        <span class="user-tier-pill tier-free" id="navTierBadge">FREE</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Supabase Connection Status Banner -->
+  <div class="supabase-config-banner">
+    <div class="supabase-badge-status">
+      <div class="status-dot" id="dbStatusDot"></div>
+      <span id="dbStatusText">Supabase Backend: พร้อมทำงาน (Local Storage & Realtime DB Ready)</span>
+    </div>
+    <span style="color: var(--text-muted); cursor: pointer;" onclick="openSupabaseModal()">
+      <i class="fa-solid fa-gear"></i> เชื่อมต่อ Supabase Project ของคุณ
+    </span>
+  </div>
+
+  <!-- ==============================================================================
+       VIEW 1: LANDING PAGE (หน้าแนะนำแอป + ปลุกเร้าการสมัครสมาชิกสร้างรายได้)
+       ============================================================================== -->
+  <main id="landingView" class="view-section active">
+    
+    <!-- Hero Section -->
+    <section class="landing-hero">
+      <div class="hero-pill-badge pulse-badge">
+        <i class="fa-solid fa-fire"></i> แพลตฟอร์มท่องเที่ยวไทยอันดับ 1 ที่ "เที่ยวแล้วสร้างรายได้"
+      </div>
+      
+      <h2 class="hero-title">
+        เปิดประตูท่องเที่ยวไทย<br>
+        <span class="highlight">ได้ทั้งประสบการณ์ ได้ทั้งเงินคืน ฿10,000+</span>
+      </h2>
+      
+      <p class="hero-subtitle">
+        แอปพลิเคชันเดียวที่ผสานระบบ GPS แผนที่ท่องเที่ยวอัจฉริยะ, ภารกิจสะสมระยะทาง (เดิน, ปั่น, ขับรถ) 
+        และสิทธิพิเศษ VIP ให้คุณประหยัดค่ากิน เที่ยว พัก พร้อมชิงเงินรางวัลบนลีดเดอร์บอร์ดได้ทุกสัปดาห์!
+      </p>
+
+      <div class="hero-cta-group">
+        <a href="#pricing" class="btn btn-gold">
+          <i class="fa-solid fa-crown"></i> สมัครสมาชิกรับสิทธิ์ VIP ทันที
+        </a>
+        <button class="btn btn-primary" onclick="switchMainView('app')">
+          <i class="fa-solid fa-location-dot"></i> ทดลองเปิดแอปท่องเที่ยว (Live App)
+        </button>
+      </div>
+
+      <!-- Live Traction Stats -->
+      <div class="hero-stats-bar">
+        <div class="stat-item">
+          <h3>77</h3>
+          <p>จังหวัดทั่วไทยพร้อมพิกัดลับ</p>
+        </div>
+        <div class="stat-item">
+          <h3>฿2.8M+</h3>
+          <p>มูลค่าส่วนลด & เงินคืนสะสม</p>
+        </div>
+        <div class="stat-item">
+          <h3>14,200+</h3>
+          <p>นักเดินทางที่สร้างรายได้จริง</p>
+        </div>
+        <div class="stat-item">
+          <h3>4.9 ★</h3>
+          <p>คะแนนความพึงพอใจ</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Concept & Features Spotlight -->
+    <section class="concept-spotlight" id="features">
+      <div class="section-header">
+        <span class="section-tag">Make Me Money System</span>
+        <h2 class="section-title">ทำไมระบบนี้ถึงสร้างรายได้และเติบโตอย่างก้าวกระโดด?</h2>
+        <p class="section-desc">
+          เราออกแบบระบบ Subscription และ Gamification ที่สร้างผลประโยชน์แบบ Win-Win ระหว่างนักเดินทาง ผู้ประกอบการท่องเที่ยว และเจ้าของแพลตฟอร์ม
+        </p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon-box">
+            <i class="fa-solid fa-map-location-dot"></i>
+          </div>
+          <h3>GPS นำทาง & จุดเช็กอินลับ Unseen</h3>
+          <p>
+            เข้าถึงพิกัดที่เที่ยวลับเฉพาะสมาชิก VIP ที่ไม่มีใน Google Maps ทั่วไป พร้อมระบบคำนวณความเร็วและระยะทางแบบเรียลไทม์
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-box" style="background: rgba(14, 165, 233, 0.15); color: var(--secondary);">
+            <i class="fa-solid fa-person-running"></i>
+          </div>
+          <h3>เควสการเดินทาง 4 มิติ (Quests)</h3>
+          <p>
+            สะสมระยะทางจากการเดินชมเมือง, ปั่นจักรยาน, ขับรถโรดทริป หรือขี่มอเตอร์ไซค์ เปลี่ยนกิโลเมตรเป็นเหรียญแลก Voucher เงินสด
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-box" style="background: rgba(245, 158, 11, 0.15); color: var(--accent-gold);">
+            <i class="fa-solid fa-trophy"></i>
+          </div>
+          <h3>ลีดเดอร์บอร์ดแจกรางวัลรายเดือน</h3>
+          <p>
+            แข่งขันสะสมระยะทางเพื่อขึ้นโพเดียม Top 3 รับเงินสด สนับสนุนตั๋วเครื่องบิน และของขวัญจาก ททท. และพาร์ตเนอร์
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-box" style="background: rgba(239, 68, 68, 0.15); color: #f43f5e;">
+            <i class="fa-solid fa-hand-holding-dollar"></i>
+          </div>
+          <h3>ประหยัดมากกว่าค่าสมาชิก 10 เท่า!</h3>
+          <p>
+            ส่วนลดโรงแรม คาเฟ่ และร้านของฝากสูงสุด 50% ทำให้สมาชิกคืนทุนตั้งแต่การเช็กอินครั้งแรกของการเดินทาง
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pricing Section (Core Subscription Model) -->
+    <section class="pricing-section" id="pricing">
+      <div class="section-header">
+        <span class="section-tag">Subscription Plans</span>
+        <h2 class="section-title">เลือกแพ็กเกจที่เหมาะกับสไตล์การเดินทางของคุณ</h2>
+        <p class="section-desc">
+          สมัครสมาชิกเพื่อปลดล็อกสิทธิพิเศษ ข้อมูลพิกัดลับ และระบบสร้างรายได้ทันที
+        </p>
+      </div>
+
+      <div class="pricing-grid">
+        
+        <!-- Tier 1: Free Explorer -->
+        <div class="pricing-card" id="planCardFree">
+          <div class="pricing-header">
+            <h3>นักสำรวจเริ่มต้น (Free)</h3>
+            <p>เหมาะสำหรับผู้เริ่มต้นท่องเที่ยวทั่วไป</p>
+            <div class="pricing-price">
+              <span class="currency">฿</span>
+              <span class="amount">0</span>
+              <span class="period">/ ตลอดชีพ</span>
+            </div>
+          </div>
+          <ul class="pricing-features">
+            <li><i class="fa-solid fa-check"></i> แผนที่ท่องเที่ยวไทยขั้นพื้นฐาน</li>
+            <li><i class="fa-solid fa-check"></i> ค้นหาสถานที่ยอดนิยม</li>
+            <li><i class="fa-solid fa-check"></i> บันทึกระยะทางแบบจำกัด</li>
+            <li style="color: var(--text-dim);"><i class="fa-solid fa-xmark" style="color: var(--text-dim);"></i> ไม่มีสิทธิ์ดูพิกัดลับ VIP</li>
+            <li style="color: var(--text-dim);"><i class="fa-solid fa-xmark" style="color: var(--text-dim);"></i> ไม่สามารถรับ Voucher เงินสดจากเควส</li>
+          </ul>
+          <button class="btn btn-secondary btn-full" onclick="selectPlan('free')">
+            ใช้งานปัจจุบัน
+          </button>
+        </div>
+
+        <!-- Tier 2: Pro Traveler (Popular) -->
+        <div class="pricing-card popular" id="planCardPro">
+          <div class="pricing-badge popular-badge">ยอดนิยม 🔥 แนะนำ</div>
+          <div class="pricing-header">
+            <h3>โปร ทราเวลเลอร์ (Pro)</h3>
+            <p>สายเที่ยวประจำ ปั่น ขับ วิ่ง รับสิทธิประโยชน์สุดคุ้ม</p>
+            <div class="pricing-price">
+              <span class="currency">฿</span>
+              <span class="amount">199</span>
+              <span class="period">/ เดือน</span>
+            </div>
+          </div>
+          <ul class="pricing-features">
+            <li><i class="fa-solid fa-check"></i> <strong>ระบบ GPS นำทางแม่นยำสูง</strong> พร้อมมาตรวัดความเร็ว</li>
+            <li><i class="fa-solid fa-check"></i> <strong>ปลดล็อกเควสกิจกรรมทั้ง 4 หมวด</strong> แลกคูปองเงินสดได้จริง</li>
+            <li><i class="fa-solid fa-check"></i> สิทธิ์เข้าร่วมลีดเดอร์บอร์ดชิงรางวัลประจำเดือน</li>
+            <li><i class="fa-solid fa-check"></i> <strong>ไม่มีโฆษณากวนใจ 100%</strong></li>
+            <li><i class="fa-solid fa-check"></i> คูปองส่วนลดที่พัก & คาเฟ่ 15% ทันที</li>
+          </ul>
+          <button class="btn btn-primary btn-full" onclick="openPaymentGateway('pro', 'Pro Traveler', 199)">
+            <i class="fa-solid fa-bolt"></i> สมัครแพ็กเกจ Pro (฿199)
+          </button>
+        </div>
+
+        <!-- Tier 3: VIP Elite Voyager -->
+        <div class="pricing-card vip" id="planCardVip">
+          <div class="pricing-badge vip-badge">คุ้มค่าสูงสุด 👑 MAKE ME MONEY</div>
+          <div class="pricing-header">
+            <h3>VIP Elite Voyager (VIP)</h3>
+            <p>เอกสิทธิ์ขั้นสูงสุด ปลดล็อกทุกพิกัดลับและคืนกำไรมหาศาล</p>
+            <div class="pricing-price">
+              <span class="currency">฿</span>
+              <span class="amount">499</span>
+              <span class="period">/ เดือน</span>
+            </div>
+          </div>
+          <ul class="pricing-features">
+            <li><i class="fa-solid fa-crown" style="color: var(--accent-gold);"></i> <strong>รวมทุกฟีเจอร์ของแพ็กเกจ Pro ทั้งหมด</strong></li>
+            <li><i class="fa-solid fa-crown" style="color: var(--accent-gold);"></i> <strong>ปลดล็อกพิกัดลับ Unseen 77 จังหวัด</strong> พร้อมข้อมูลลับ</li>
+            <li><i class="fa-solid fa-crown" style="color: var(--accent-gold);"></i> <strong>ส่วนลดโรงแรม รีสอร์ต 5 ดาว สูงสุด 50%</strong></li>
+            <li><i class="fa-solid fa-crown" style="color: var(--accent-gold);"></i> AI ไกด์ส่วนตัวจัดทริปอัตโนมัติ 24 ชม.</li>
+            <li><i class="fa-solid fa-crown" style="color: var(--accent-gold);"></i> ฟรีประกันภัยการเดินทางวงเงิน ฿100,000</li>
+            <li><i class="fa-solid fa-crown" style="color: var(--accent-gold);"></i> มงกุฎทองคำสถานะ VIP บนลีดเดอร์บอร์ด</li>
+          </ul>
+          <button class="btn btn-gold btn-full" onclick="openPaymentGateway('vip', 'VIP Elite Voyager', 499)">
+            <i class="fa-solid fa-crown"></i> สมัครสมาชิก VIP (฿499)
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==============================================================================
+       VIEW 2: APP DASHBOARD (ออกแบบตามภาพร่าง Wireframe ทั้ง 4 หน้า)
+       [ แผนที่ GPS | กิจกรรม | ลีดเดอร์บอร์ด | บัญชี ]
+       ============================================================================== -->
+  <section id="appView" class="view-section">
+    <div class="app-wrapper">
+
+      <div class="app-view-controls">
+        <span><i class="fa-solid fa-circle-info"></i> จำลองหน้าจอสมาร์ตโฟนตามโครงสร้าง Wireframe</span>
+        <button class="mode-toggle-btn" onclick="toggleWideMode()" id="wideModeBtn">
+          <i class="fa-solid fa-expand"></i> ขยายเต็มจอ
+        </button>
+      </div>
+
+      <!-- Smartphone Device Frame Container -->
+      <div class="app-device-frame" id="deviceFrame">
+        
+        <!-- Mobile Status Header -->
+        <div class="mobile-status-header">
+          <span id="liveClock">09:41</span>
+          <span>
+            <i class="fa-solid fa-signal" style="margin-right: 4px;"></i>
+            <i class="fa-solid fa-wifi" style="margin-right: 4px;"></i>
+            <i class="fa-solid fa-battery-full"></i>
+          </span>
+        </div>
+
+        <!-- VIEWPORT CONTAINING THE 4 SCREENS -->
+        <div class="app-screens-viewport">
+
+          <!-- -------------------------------------------------------------
+               SCREEN 1: หน้าหลัก (แผนที่ GPS & ค้นหาตำแหน่ง & ความเร็ว km/h)
+               ------------------------------------------------------------- -->
+          <div class="app-screen active" id="screen-map">
+            <div class="screen-map-container">
+              
+              <!-- Search bar (ตามภาพร่าง: "ค้นหาตำแหน่ง") -->
+              <div class="map-search-bar-wrap">
+                <div class="map-search-bar">
+                  <i class="fa-solid fa-magnifying-glass"></i>
+                  <input type="text" class="map-search-input" id="mapSearchInput" placeholder="ค้นหาตำแหน่ง, วัด, ดอย, เกาะ, คาเฟ่..." oninput="handleSearchMap(this.value)">
+                  <button style="background: none; border: none; color: var(--text-muted); cursor: pointer;" onclick="locateUserGPS()">
+                    <i class="fa-solid fa-crosshairs"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Quick Categories Filter -->
+              <div class="filter-tags-scroll">
+                <button class="tag-filter-btn active" onclick="filterMapCategory('all', this)">ทั้งหมด</button>
+                <button class="tag-filter-btn" onclick="filterMapCategory('nature', this)">🌿 ธรรมชาติ</button>
+                <button class="tag-filter-btn" onclick="filterMapCategory('culture', this)">🛕 วัฒนธรรม</button>
+                <button class="tag-filter-btn" onclick="filterMapCategory('cafe', this)">☕ คาเฟ่</button>
+                <button class="tag-filter-btn" onclick="filterMapCategory('camping', this)">🏕️ แคมป์ปิ้ง</button>
+                <button class="tag-filter-btn vip-filter" onclick="filterMapCategory('vip_secret', this)">
+                  <i class="fa-solid fa-lock"></i> พิกัดลับ VIP
+                </button>
+              </div>
+
+              <!-- Interactive Leaflet Map -->
+              <div id="leaflet-map"></div>
+
+              <!-- Bottom Speed Status Bar (ตามภาพร่าง: "ความเร็ว km/h") -->
+              <div class="map-speed-status-bar">
+                <div class="speed-display">
+                  <div class="speed-gauge-circle">
+                    <div class="speed-inner-circle">
+                      <span class="speed-val" id="liveSpeedNumber">0</span>
+                      <span class="speed-unit">km/h</span>
+                    </div>
+                  </div>
+                  <div class="speed-info">
+                    <h4 id="travelModeTitle">กำลังหยุดพัก</h4>
+                    <p>ระยะทางทริปนี้: <strong id="tripDistText" style="color: var(--primary-light);">0.0</strong> km</p>
+                  </div>
+                </div>
+
+                <!-- Simulation Buttons for demo -->
+                <div class="speed-action-btns">
+                  <button class="btn-speed-sim" onclick="setSpeedSimulation(5, 'เดินสำรวจเมือง', this)" title="จำลองการเดิน">
+                    <i class="fa-solid fa-person-walking"></i>
+                  </button>
+                  <button class="btn-speed-sim" onclick="setSpeedSimulation(22, 'ปั่นจักรยาน', this)" title="จำลองปั่นจักรยาน">
+                    <i class="fa-solid fa-bicycle"></i>
+                  </button>
+                  <button class="btn-speed-sim" onclick="setSpeedSimulation(75, 'ขับรถโรดทริป', this)" title="จำลองขับรถ">
+                    <i class="fa-solid fa-car"></i>
+                  </button>
+                  <button class="btn-speed-sim" onclick="setSpeedSimulation(0, 'หยุดพัก', this)" title="หยุดจำลอง">
+                    <i class="fa-solid fa-stop"></i>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- -------------------------------------------------------------
+               SCREEN 2: หน้า กิจกรรม (ตามภาพร่าง: ไอคอน เดิน, จักรยาน, รถ, มอเตอร์ไซค์)
+               ------------------------------------------------------------- -->
+          <div class="app-screen" id="screen-activities">
+            <div class="screen-activities">
+              <div class="screen-activities-header">
+                <h2>ภารกิจ & กิจกรรมท่องเที่ยว</h2>
+                <p>ทำภารกิจสะสมระยะทาง รับเหรียญและคูปองส่วนลดเงินสดทันที</p>
+              </div>
+
+              <div class="quest-list" id="questListContainer">
+                <!-- Quests will be injected dynamically via JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- -------------------------------------------------------------
+               SCREEN 3: หน้า ลีดเดอร์บอร์ด (ตามภาพร่าง: โพเดียม 1, 2, 3 & ลิสต์ 4, 5, 6)
+               ------------------------------------------------------------- -->
+          <div class="app-screen" id="screen-leaderboard">
+            <div class="screen-leaderboard">
+              <div class="screen-leaderboard-header">
+                <h2>🏆 ทำเนียบสุดยอดนักเดินทาง</h2>
+                <p>ประจำสัปดาห์นี้ • ชิงเงินรางวัลและตั๋วเครื่องบินฟรี</p>
+              </div>
+
+              <!-- Top 3 Podium (ตามภาพร่าง) -->
+              <div class="podium-container">
+                <!-- Rank 2 (Silver) -->
+                <div class="podium-slot rank-2" id="podium2">
+                  <div class="podium-avatar-wrap">
+                    <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120" alt="Rank 2" class="podium-avatar">
+                  </div>
+                  <span class="podium-name">น้องฟ้า</span>
+                  <span class="podium-km">289.5 km</span>
+                  <div class="podium-pedestal">2</div>
+                </div>
+
+                <!-- Rank 1 (Gold) -->
+                <div class="podium-slot rank-1" id="podium1">
+                  <div class="podium-avatar-wrap">
+                    <span class="podium-crown">👑</span>
+                    <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120" alt="Rank 1" class="podium-avatar">
+                  </div>
+                  <span class="podium-name">พี่ตูน</span>
+                  <span class="podium-km">342.8 km</span>
+                  <div class="podium-pedestal">1</div>
+                </div>
+
+                <!-- Rank 3 (Bronze) -->
+                <div class="podium-slot rank-3" id="podium3">
+                  <div class="podium-avatar-wrap">
+                    <img src="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=120" alt="Rank 3" class="podium-avatar">
+                  </div>
+                  <span class="podium-name">กัปตันป้อม</span>
+                  <span class="podium-km">215.3 km</span>
+                  <div class="podium-pedestal">3</div>
+                </div>
+              </div>
+
+              <!-- List 4, 5, 6 ... (ตามภาพร่าง: 4 ชื่อ .... km, 5 ชื่อ ... km, 6 ชื่อ ... km) -->
+              <div class="leaderboard-list" id="leaderboardListWrap">
+                <!-- Injected dynamically via JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- -------------------------------------------------------------
+               SCREEN 4: หน้า บัญชี (ตามภาพร่าง: ชื่อ Account, รหัสผ่าน/ข้อมูล, บัญชี)
+               ------------------------------------------------------------- -->
+          <div class="app-screen" id="screen-account">
+            <div class="screen-account">
+              
+              <!-- Profile card -->
+              <div class="account-profile-card">
+                <div class="account-avatar-wrapper">
+                  <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200" alt="Profile" class="account-avatar-img" id="accountAvatar">
+                  <div class="account-badge-indicator" id="accountBadgeIcon">
+                    <i class="fa-solid fa-user"></i>
+                  </div>
+                </div>
+                <h3 class="account-name" id="accountName">กมลชนก นักสำรวจ (คุณ)</h3>
+                <p class="account-email" id="accountEmail">kamonchanok.travel@gothai.app</p>
+                <div class="account-status-pill tier-free" id="accountStatusPill">
+                  <i class="fa-solid fa-circle-check"></i> <span id="accountStatusText">Free Explorer</span>
+                </div>
+              </div>
+
+              <!-- Make Me Money: Savings & Coins Stats -->
+              <div class="revenue-perks-summary">
+                <div class="perk-metric-card">
+                  <div class="val" id="mySavingsVal">฿2,450</div>
+                  <div class="label">ประหยัดค่าเที่ยวแล้วสะสม</div>
+                </div>
+                <div class="perk-metric-card">
+                  <div class="val" id="myCoinsVal">450</div>
+                  <div class="label">Travel Coins พร้อมแลก</div>
+                </div>
+              </div>
+
+              <!-- Menu list -->
+              <div class="account-menu-list">
+                <div class="account-menu-item" onclick="openUpgradePrompt()">
+                  <div class="menu-left">
+                    <i class="fa-solid fa-crown" style="color: var(--accent-gold);"></i>
+                    <div>
+                      <div>ระดับสมาชิก & แพ็กเกจ</div>
+                      <small style="color: var(--text-muted);" id="accountPlanSubtext">อัปเกรดเพื่อรับเงินคืนสูงสุด 50%</small>
+                    </div>
+                  </div>
+                  <i class="fa-solid fa-chevron-right" style="color: var(--text-dim);"></i>
+                </div>
+
+                <div class="account-menu-item" onclick="openOrderHistoryModal()">
+                  <div class="menu-left">
+                    <i class="fa-solid fa-receipt"></i>
+                    <div>
+                      <div>ประวัติการชำระเงิน & ใบเสร็จ</div>
+                      <small style="color: var(--text-muted);">ดูรายการธุรกรรมที่สำเร็จ</small>
+                    </div>
+                  </div>
+                  <i class="fa-solid fa-chevron-right" style="color: var(--text-dim);"></i>
+                </div>
+
+                <div class="account-menu-item" onclick="openSupabaseModal()">
+                  <div class="menu-left">
+                    <i class="fa-solid fa-database"></i>
+                    <div>
+                      <div>การเชื่อมต่อ Supabase Backend</div>
+                      <small style="color: var(--text-muted);" id="accountDbSubtext">เชื่อมต่อเพื่อซิงค์ข้อมูลกับคลาวด์</small>
+                    </div>
+                  </div>
+                  <i class="fa-solid fa-chevron-right" style="color: var(--text-dim);"></i>
+                </div>
+
+                <div class="account-menu-item" onclick="resetDemoData()">
+                  <div class="menu-left">
+                    <i class="fa-solid fa-rotate-right" style="color: #94a3b8;"></i>
+                    <div>
+                      <div>รีเซ็ตข้อมูลตัวอย่าง (Reset Demo)</div>
+                    </div>
+                  </div>
+                  <i class="fa-solid fa-chevron-right" style="color: var(--text-dim);"></i>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+        <!-- BOTTOM TAB NAVIGATION (ตามภาพร่าง: [ แผนที่ | กิจกรรม | ลีดเดอร์บอร์ด | บัญชี ]) -->
+        <nav class="app-bottom-navbar">
+          <button class="bottom-nav-item active" onclick="switchAppScreen('map')" id="nav-btn-map">
+            <i class="fa-solid fa-map-location-dot"></i>
+            <span>แผนที่</span>
+          </button>
+          <button class="bottom-nav-item" onclick="switchAppScreen('activities')" id="nav-btn-activities">
+            <i class="fa-solid fa-person-running"></i>
+            <span>กิจกรรม</span>
+          </button>
+          <button class="bottom-nav-item" onclick="switchAppScreen('leaderboard')" id="nav-btn-leaderboard">
+            <i class="fa-solid fa-trophy"></i>
+            <span>ลีดเดอร์บอร์ด</span>
+          </button>
+          <button class="bottom-nav-item" onclick="switchAppScreen('account')" id="nav-btn-account">
+            <i class="fa-solid fa-user"></i>
+            <span>บัญชี</span>
+          </button>
+        </nav>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ==============================================================================
+       MODAL 1: PAYMENT GATEWAY (จำลองระบบชำระเงินสร้างรายได้ MAKE ME MONEY)
+       ============================================================================== -->
+  <div class="modal-overlay" id="paymentModal">
+    <div class="payment-modal-box">
+      <button class="modal-close-btn" onclick="closePaymentModal()">&times;</button>
+      
+      <div class="payment-modal-content">
+        <div class="payment-modal-header">
+          <h3>ระบบชำระเงินเพื่อสมัครสมาชิก</h3>
+          <p>ปลอดภัยมาตรฐานสากล 256-bit SSL Encryption</p>
+        </div>
+
+        <!-- Plan summary -->
+        <div class="order-summary-box">
+          <div>
+            <div class="order-plan-name" id="modalPlanName">VIP Elite Voyager</div>
+            <div class="order-plan-desc" id="modalPlanPeriod">รอบบิลรายเดือน • ยกเลิกได้ตลอดเวลา</div>
+          </div>
+          <div class="order-plan-price" id="modalPlanPrice">฿499</div>
+        </div>
+
+        <!-- Payment tabs: PromptPay QR / Credit Card -->
+        <div class="payment-tabs">
+          <button class="pay-tab-btn active" onclick="switchPaymentTab('promptpay', this)">
+            <i class="fa-solid fa-qrcode"></i> พร้อมเพย์ QR
+          </button>
+          <button class="pay-tab-btn" onclick="switchPaymentTab('creditcard', this)">
+            <i class="fa-solid fa-credit-card"></i> บัตรเครดิต/เดบิต
+          </button>
+        </div>
+
+        <!-- Tab 1: PromptPay QR -->
+        <div class="pay-tab-pane active" id="tab-promptpay">
+          <div class="promptpay-box">
+            <div class="qr-code-wrapper">
+              <!-- Realistic generated Thai QR PromptPay mockup -->
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://promptpay.io/0812345678/499" alt="PromptPay QR Code" id="promptPayQrImg">
+            </div>
+            <div class="qr-countdown">
+              กรุณาสแกนชำระภายใน <span id="qrTimer">04:59</span> นาที
+            </div>
+            <p style="font-size: 0.75rem; color: var(--text-dim); margin-top: 0.5rem;">
+              รองรับ K PLUS, SCB EASY, Krungthai NEXT และทุกธนาคาร
+            </p>
+          </div>
+        </div>
+
+        <!-- Tab 2: Credit Card -->
+        <div class="pay-tab-pane" id="tab-creditcard">
+          <div style="padding: 0.5rem 0 1rem;">
+            <div class="card-input-group">
+              <label>หมายเลขบัตร 16 หลัก</label>
+              <input type="text" class="card-input" placeholder="4242 •••• •••• 4242" value="4242 8888 9999 1234">
+            </div>
+            <div class="card-row-2">
+              <div class="card-input-group">
+                <label>วันหมดอายุ (MM/YY)</label>
+                <input type="text" class="card-input" placeholder="12/28" value="12/28">
+              </div>
+              <div class="card-input-group">
+                <label>รหัสความปลอดภัย (CVV)</label>
+                <input type="password" class="card-input" placeholder="•••" value="888">
+              </div>
+            </div>
+            <div class="card-input-group">
+              <label>ชื่อผู้ถือบัตร</label>
+              <input type="text" class="card-input" placeholder="KAMONCHANOK T" value="KAMONCHANOK T">
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button class="btn btn-primary btn-full" id="confirmPaymentBtn" onclick="processPaymentSimulation()">
+          <i class="fa-solid fa-lock"></i> ยืนยันการชำระเงิน <span id="payBtnAmount">฿499</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==============================================================================
+       MODAL 2: PAYMENT SUCCESS CELEBRATION (แสดงผล 'ชำระเงินสำเร็จ' ตามเงื่อนไข)
+       ============================================================================== -->
+  <div class="modal-overlay" id="successModal">
+    <div class="success-modal-box">
+      <div class="success-check-icon">
+        <i class="fa-solid fa-check"></i>
+      </div>
+      <h2>ชำระเงินสำเร็จ! 🎉</h2>
+      <p style="color: var(--text-muted); font-size: 0.88rem;">
+        ยินดีต้อนรับสู่สถานะสมาชิกใหม่ สิทธิประโยชน์และรายได้ของคุณได้รับการปลดล็อกแล้ว
+      </p>
+
+      <div class="success-receipt-card">
+        <div class="receipt-row">
+          <span>รหัสธุรกรรม (Ref):</span>
+          <strong id="receiptRef" style="color: white;">TXN-88492041</strong>
+        </div>
+        <div class="receipt-row">
+          <span>แพ็กเกจที่สมัคร:</span>
+          <strong id="receiptPlan" style="color: var(--accent-gold);">VIP Elite Voyager</strong>
+        </div>
+        <div class="receipt-row">
+          <span>ช่องทางชำระเงิน:</span>
+          <span id="receiptMethod">พร้อมเพย์ (QR PromptPay)</span>
+        </div>
+        <div class="receipt-row">
+          <span>สถานะการบันทึก:</span>
+          <span style="color: var(--primary-light);"><i class="fa-solid fa-circle-check"></i> สำเร็จ (Supabase Synced)</span>
+        </div>
+        <div class="receipt-row total-row">
+          <span>ยอดชำระสุทธิ:</span>
+          <span id="receiptAmount">฿499.00</span>
+        </div>
+      </div>
+
+      <button class="btn btn-gold btn-full" onclick="dismissSuccessAndOpenApp()">
+        <i class="fa-solid fa-arrow-right"></i> เข้าสู่แดชบอร์ดท่องเที่ยวทันที
+      </button>
+    </div>
+  </div>
+
+  <!-- ==============================================================================
+       MODAL 3: SUPABASE CONFIGURATION (ตั้งค่าเชื่อมต่อ SUPABASE จริง)
+       ============================================================================== -->
+  <div class="modal-overlay" id="supabaseModal">
+    <div class="payment-modal-box">
+      <button class="modal-close-btn" onclick="closeSupabaseModal()">&times;</button>
+      <div class="payment-modal-content">
+        <div class="payment-modal-header">
+          <h3><i class="fa-solid fa-database" style="color: var(--primary-light);"></i> ตั้งค่า Supabase Backend</h3>
+          <p>ระบบสามารถทำงานได้ทันทีด้วย Local Database จำลอง หรือเชื่อมต่อกับ Supabase คลาวด์จริงของคุณ</p>
+        </div>
+
+        <div class="card-input-group">
+          <label>Supabase Project URL</label>
+          <input type="text" class="card-input" id="sbProjectUrl" placeholder="https://your-project.supabase.co">
+        </div>
+
+        <div class="card-input-group">
+          <label>Supabase Anon Public API Key</label>
+          <input type="password" class="card-input" id="sbAnonKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+        </div>
+
+        <div style="background: rgba(255, 255, 255, 0.04); border-radius: var(--radius-sm); padding: 0.85rem; font-size: 0.78rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+          <strong style="color: white;"><i class="fa-solid fa-lightbulb" style="color: var(--accent-gold);"></i> คำแนะนำ:</strong>
+          <br>1. นำไฟล์ <code style="color: var(--primary-light);">supabase_schema.sql</code> ในโปรเจกต์นี้ไปรันใน Supabase SQL Editor
+          <br>2. คัดลอก Project URL และ anon key จากหน้า Settings -> API มาวาง
+          <br>3. หากยังไม่มีบัญชี Supabase แอปจะทำงานด้วยโหมด LocalStorage อัตโนมัติ 100%!
+        </div>
+
+        <div style="display: flex; gap: 0.75rem;">
+          <button class="btn btn-primary" style="flex: 1;" onclick="saveSupabaseConfig()">
+            <i class="fa-solid fa-floppy-disk"></i> บันทึกการเชื่อมต่อ
+          </button>
+          <button class="btn btn-secondary" onclick="useDemoSupabaseMode()">
+            ใช้ Demo Mode
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==============================================================================
+       MODAL 4: ORDER & INVOICE HISTORY
+       ============================================================================== -->
+  <div class="modal-overlay" id="orderHistoryModal">
+    <div class="payment-modal-box">
+      <button class="modal-close-btn" onclick="closeOrderHistoryModal()">&times;</button>
+      <div class="payment-modal-content">
+        <div class="payment-modal-header">
+          <h3>ประวัติการชำระเงินสร้างรายได้</h3>
+          <p>รายการสมัครสมาชิกและธุรกรรมทั้งหมดในระบบ</p>
+        </div>
+        <div id="orderHistoryList" style="display: flex; flex-direction: column; gap: 0.75rem; max-height: 380px; overflow-y: auto;">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Leaflet Map JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Core App Logic -->
+  <script src="app.js"></script>
+</body>
+</html>
